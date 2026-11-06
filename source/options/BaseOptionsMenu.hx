@@ -341,13 +341,13 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					}
 				}
 			}
-			else if(FlxG.gamepads.anyJustPressed(ANY) || FlxG.gamepads.anyJustPressed(LEFT_TRIGGER) || FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER) || FlxG.gamepads.anyJustReleased(ANY))
+			else if(FlxG.gamepads.anyJustPressed(ANY) || backend.Controls.triggerJustPressed(0) || backend.Controls.triggerJustPressed(1) || FlxG.gamepads.anyJustReleased(ANY))
 			{
 				var keyPressed:FlxGamepadInputID = NONE;
 				var keyReleased:FlxGamepadInputID = NONE;
-				if(FlxG.gamepads.anyJustPressed(LEFT_TRIGGER))
+				if(backend.Controls.triggerJustPressed(0))
 					keyPressed = LEFT_TRIGGER; //it wasnt working for some reason
-				else if(FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER))
+				else if(backend.Controls.triggerJustPressed(1))
 					keyPressed = RIGHT_TRIGGER; //it wasnt working for some reason
 				else
 				{

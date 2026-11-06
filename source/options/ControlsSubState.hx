@@ -120,7 +120,7 @@ class ControlsSubState extends MusicBeatSubstate
 		var myID:Int = 0;
 
 		// this approach is also null safe. you wont run to NORs with this way
-		options = [[false, 'NOTES']];
+		options = [[true, 'NOTES']];
 		var uhhh:Array<Array<Dynamic>> = [];
 
 		for (k in ClientPrefs.keyBinds.keys()) {
@@ -137,7 +137,7 @@ class ControlsSubState extends MusicBeatSubstate
 
 		for (what in uhhh) {
 			//trace(what);
-			options.push([false, '${what[0] + 1}K ${what[1] + 1}', what[2], '${what[0] + 1} Keys Note ${what[1] + 1}']);
+			options.push([true, '${what[0] + 1}K ${what[1] + 1}', what[2], '${what[0] + 1} Keys Note ${what[1] + 1}']);
 		}
 
 		var optionsTemplate:Array<Dynamic> = [
@@ -337,8 +337,10 @@ class ControlsSubState extends MusicBeatSubstate
 			if(FlxG.keys.justPressed.UP || FlxG.gamepads.anyJustPressed(DPAD_UP) || FlxG.gamepads.anyJustPressed(LEFT_STICK_DIGITAL_UP) #if mobile || _virtualpad.buttonUp.justPressed #end) updateText(-1);
 			else if(FlxG.keys.justPressed.DOWN || FlxG.gamepads.anyJustPressed(DPAD_DOWN) || FlxG.gamepads.anyJustPressed(LEFT_STICK_DIGITAL_DOWN) #if mobile || _virtualpad.buttonDown.justPressed #end) updateText(1);
 
-			if(FlxG.keys.justPressed.Q || FlxG.keys.justPressed.E #if mobile || _virtualpad.buttonX.justPressed || _virtualpad.buttonY.justPressed #end && onKeyboardMode) {
-				curEKPage += FlxG.keys.justPressed.E #if mobile || _virtualpad.buttonY.justPressed #end ? 1 : -1;
+			var pageNext:Bool = FlxG.keys.justPressed.E #if mobile || _virtualpad.buttonY.justPressed #end || (!onKeyboardMode && backend.Controls.triggerJustPressed(1));
+			var pagePrev:Bool = FlxG.keys.justPressed.Q #if mobile || _virtualpad.buttonX.justPressed #end || (!onKeyboardMode && backend.Controls.triggerJustPressed(0));
+			if(pageNext || pagePrev) {
+				curEKPage += pageNext ? 1 : -1;
 				if (curEKPage < 0) curEKPage = 0;
 				if (curEKPage > ExtraKeysHandler.instance.data.maxKeys) curEKPage = ExtraKeysHandler.instance.data.maxKeys;
 				createTexts();
@@ -431,12 +433,12 @@ class ControlsSubState extends MusicBeatSubstate
 						}
 					}
 				}
-				else if(FlxG.gamepads.anyJustPressed(ANY) || FlxG.gamepads.anyJustPressed(LEFT_TRIGGER) || FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER) || FlxG.gamepads.anyJustReleased(ANY))
+				else if(FlxG.gamepads.anyJustPressed(ANY) || backend.Controls.triggerJustPressed(0) || backend.Controls.triggerJustPressed(1) || FlxG.gamepads.anyJustReleased(ANY))
 				{
 					var keyPressed:Null<FlxGamepadInputID> = NONE;
 					var keyReleased:Null<FlxGamepadInputID> = NONE;
-					if(FlxG.gamepads.anyJustPressed(LEFT_TRIGGER)) keyPressed = LEFT_TRIGGER; //it wasnt working for some reason
-					else if(FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER)) keyPressed = RIGHT_TRIGGER; //it wasnt working for some reason
+					if(backend.Controls.triggerJustPressed(0)) keyPressed = LEFT_TRIGGER; //it wasnt working for some reason
+					else if(backend.Controls.triggerJustPressed(1)) keyPressed = RIGHT_TRIGGER; //it wasnt working for some reason
 					else
 					{
 						for (i in 0...FlxG.gamepads.numActiveGamepads)
@@ -569,7 +571,7 @@ class ControlsSubState extends MusicBeatSubstate
 		createTexts();
 
 		if (onKeyboardMode) tipTxt.text = 'Press Q/E to change the Extra Keys Page. Hold SHIFT to scroll 3x faster.';
-		else tipTxt.text = 'No controller input is supported during gameplay.';
+		else tipTxt.text = 'L2/R2: ganti halaman Extra Keys. L1/R1: ganti mode keyboard/gamepad.';
 	}
 
 	function updateAlt(?doSwap:Bool = false)
