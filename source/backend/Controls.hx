@@ -116,7 +116,7 @@ class Controls
 		{
 			for (key in keys)
 			{
-				if (FlxG.gamepads.anyJustPressed(key) == true)
+				if (gpJustPressed(key))
 				{
 					controllerMode = true;
 					return true;
@@ -131,7 +131,7 @@ class Controls
 		{
 			for (key in keys)
 			{
-				if (FlxG.gamepads.anyPressed(key) == true)
+				if (gpPressed(key))
 				{
 					controllerMode = true;
 					return true;
@@ -146,7 +146,7 @@ class Controls
 		{
 			for (key in keys)
 			{
-				if (FlxG.gamepads.anyJustReleased(key) == true)
+				if (gpJustReleased(key))
 				{
 					controllerMode = true;
 					return true;
@@ -156,11 +156,74 @@ class Controls
 		return false;
 	}
 
+	// ===== L2 / R2 =====
+	// Trigger dibaca lewat nilai analog (> 0.5) atau tombol digital L2/R2, dihitung SEKALI per frame.
+	// Ini menghindari trigger yang "menempel" ketika nilai diamnya -1 di sebagian gamepad Android,
+	// dan membuat L2/R2 bisa dipakai untuk note, menu, maupun mapping.
+	static var trigNow:Array<Bool> = [false, false];
+	static var trigPrev:Array<Bool> = [false, false];
+	static var trigHooked:Bool = false;
+
+	public static function triggerPressed(i:Int):Bool return trigNow[i];
+	public static function triggerJustPressed(i:Int):Bool return trigNow[i] && !trigPrev[i];
+	public static function triggerJustReleased(i:Int):Bool return !trigNow[i] && trigPrev[i];
+
+	static function updateTriggers():Void
+	{
+		trigPrev[0] = trigNow[0];
+		trigPrev[1] = trigNow[1];
+		var l:Bool = false;
+		var r:Bool = false;
+		for (i in 0...FlxG.gamepads.numActiveGamepads)
+		{
+			var pad = FlxG.gamepads.getByID(i);
+			if (pad == null) continue;
+			if (pad.getAxis(LEFT_TRIGGER) > 0.5 || pad.checkStatus(LEFT_TRIGGER_BUTTON, PRESSED)) l = true;
+			if (pad.getAxis(RIGHT_TRIGGER) > 0.5 || pad.checkStatus(RIGHT_TRIGGER_BUTTON, PRESSED)) r = true;
+		}
+		trigNow[0] = l;
+		trigNow[1] = r;
+	}
+
+	static function triggerIndex(key:FlxGamepadInputID):Int
+	{
+		return switch (key)
+		{
+			case LEFT_TRIGGER, LEFT_TRIGGER_BUTTON: 0;
+			case RIGHT_TRIGGER, RIGHT_TRIGGER_BUTTON: 1;
+			default: -1;
+		}
+	}
+
+	static function gpJustPressed(key:FlxGamepadInputID):Bool
+	{
+		var t:Int = triggerIndex(key);
+		return t >= 0 ? triggerJustPressed(t) : (FlxG.gamepads.anyJustPressed(key) == true);
+	}
+
+	static function gpPressed(key:FlxGamepadInputID):Bool
+	{
+		var t:Int = triggerIndex(key);
+		return t >= 0 ? triggerPressed(t) : (FlxG.gamepads.anyPressed(key) == true);
+	}
+
+	static function gpJustReleased(key:FlxGamepadInputID):Bool
+	{
+		var t:Int = triggerIndex(key);
+		return t >= 0 ? triggerJustReleased(t) : (FlxG.gamepads.anyJustReleased(key) == true);
+	}
+
 	// IGNORE THESE
 	public static var instance:Controls;
 	public function new()
 	{
 		keyboardBinds = ClientPrefs.keyBinds;
 		gamepadBinds = ClientPrefs.gamepadBinds;
+
+		if (!trigHooked)
+		{
+			trigHooked = true;
+			FlxG.signals.preUpdate.add(updateTriggers);
+		}
 	}
 }

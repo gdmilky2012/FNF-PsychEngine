@@ -32,14 +32,29 @@ class MusicBeatState extends FlxUIState
  		add(_hitbox);
 	}
 
+	var _touchMenu:mobile.flixel.TouchMenuInput;
+
 	public function addVirtualPad(?dpad:FlxDPadMode, ?action:FlxActionMode) {
 		_virtualpad = new FlxVirtualPad(dpad, action);
-		_virtualpad.alpha = ClientPrefs.data.controlsAlpha;
-		add(_virtualpad);
+
+		if (mobile.flixel.TouchMenuInput.enabledFor(this)) {
+			// Mode sentuh: vpad disembunyikan, gestur layar yang menggerakkan tombolnya
+			_virtualpad.visible = false;
+			add(_virtualpad);
+			_touchMenu = new mobile.flixel.TouchMenuInput(_virtualpad);
+			add(_touchMenu);
+		} else {
+			_virtualpad.alpha = ClientPrefs.data.controlsAlpha;
+			add(_virtualpad);
+		}
 	}
 
 	public function removeVirtualPad() {
 		remove(_virtualpad);
+		if (_touchMenu != null) {
+			remove(_touchMenu);
+			_touchMenu = null;
+		}
 	}
 
 	public function addVPadCam() {
@@ -48,6 +63,7 @@ class MusicBeatState extends FlxUIState
 		FlxG.cameras.add(camMobile, false);
 
 		_virtualpad.cameras = [camMobile];
+		if (_touchMenu != null) _touchMenu.cameras = [camMobile];
 	}
 	#end
 

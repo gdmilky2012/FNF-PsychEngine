@@ -15,6 +15,7 @@ import states.TitleState;
 	public var dynamicColors:Bool = true;
 	public var controlsAlpha:Float = 0.7;
 	public var hideHitboxHints:Bool = false;
+	public var arrowOnlyHitbox:Bool = false;
 	#if android
 	public var storageType:String = "EXTERNAL";
 	#end
@@ -176,7 +177,25 @@ class ClientPrefs {
 			}
 		}
 
-		defaultButtons = gamepadBinds.copy();
+		// Bind gamepad untuk note Extra Keys (sebelumnya hanya keyboard, jadi gamepad tidak bisa memainkan note)
+		var gpOrder:Array<FlxGamepadInputID> = [
+			DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, X, A, Y, B,
+			LEFT_SHOULDER, RIGHT_SHOULDER, LEFT_TRIGGER, RIGHT_TRIGGER
+		];
+		var gpAlt4K:Array<FlxGamepadInputID> = [X, A, Y, B];
+		for (i in 0...saveDataKeybinds.length) {
+			for (j in 0...saveDataKeybinds[i].length) {
+				var gpID = '${i}_key_$j';
+				if (gamepadBinds.exists(gpID)) continue;
+				if (i == 3 && j < gpAlt4K.length) gamepadBinds.set(gpID, [gpOrder[j], gpAlt4K[j]]); // 4K sama seperti Psych biasa
+				else if (j < gpOrder.length) gamepadBinds.set(gpID, [gpOrder[j]]);
+				else gamepadBinds.set(gpID, []);
+			}
+		}
+
+		// Salinan dalam, supaya mengubah bind tidak ikut mengubah nilai default
+		defaultButtons = new Map<String, Array<FlxGamepadInputID>>();
+		for (k => v in gamepadBinds) defaultButtons.set(k, v.copy());
 	}
 
 	public static function saveSettings() {
