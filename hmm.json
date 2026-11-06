@@ -11,8 +11,8 @@
 			"name": "lime",
 			"type": "git",
 			"dir": null,
-			"ref": "develop",
-			"url": "https://github.com/DeveloperPorting-Stuff/lime"
+			"ref": "main",
+			"url": "https://github.com/DeveloperPorting-Stuff/lime-modified"
 		},
 		{
 			"name": "openfl",
