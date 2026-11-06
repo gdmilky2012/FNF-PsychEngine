@@ -11,6 +11,7 @@ import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
 
 import flixel.math.FlxMath;
+import flixel.util.FlxSpriteUtil;
 
 class FreeplayState extends MusicBeatState
 {
@@ -34,6 +35,7 @@ class FreeplayState extends MusicBeatState
 	private var curPlaying:Bool = false;
 
 	private var iconArray:Array<HealthIcon> = [];
+	private var capsules:Array<FlxSprite> = []; // kapsul ala V-Slice di belakang tiap judul lagu
 
 	var bg:FlxSprite;
 	var intendedColor:Int;
@@ -124,6 +126,21 @@ class FreeplayState extends MusicBeatState
 		}
 		WeekData.setDirectoryFromWeek();
 
+		// Kapsul gaya V-Slice: satu gambar dipakai bersama supaya hemat memori
+		var capsuleTemplate:FlxSprite = new FlxSprite();
+		capsuleTemplate.makeGraphic(760, 100, FlxColor.TRANSPARENT, true);
+		FlxSpriteUtil.drawRoundRect(capsuleTemplate, 3, 3, 754, 94, 60, 60, 0xE6101C3A, {thickness: 4, color: 0xFF7FD6FF});
+		var capsuleAt:Int = members.indexOf(grpSongs);
+		for (i in 0...songs.length)
+		{
+			var cap:FlxSprite = new FlxSprite();
+			cap.loadGraphicFromSprite(capsuleTemplate);
+			cap.antialiasing = ClientPrefs.data.antialiasing;
+			cap.visible = false;
+			insert(capsuleAt + i, cap);
+			capsules.push(cap);
+		}
+
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 
@@ -136,6 +153,12 @@ class FreeplayState extends MusicBeatState
 		add(diffText);
 
 		add(scoreText);
+
+		var header:FlxText = new FlxText(28, 10, 0, 'FREEPLAY', 64);
+		header.setFormat(Paths.font("vcr.ttf"), 64, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		header.borderSize = 4;
+		header.scrollFactor.set();
+		add(header);
 
 
 		missingTextBG = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -552,6 +575,7 @@ class FreeplayState extends MusicBeatState
 		{
 			grpSongs.members[i].visible = grpSongs.members[i].active = false;
 			iconArray[i].visible = iconArray[i].active = false;
+			capsules[i].visible = false;
 		}
 		_lastVisibles = [];
 
@@ -563,6 +587,12 @@ class FreeplayState extends MusicBeatState
 			item.visible = item.active = true;
 			item.x = ((item.targetY - lerpSelected) * item.distancePerItem.x) + item.startPosition.x;
 			item.y = ((item.targetY - lerpSelected) * 1.3 * item.distancePerItem.y) + item.startPosition.y;
+
+			var cap:FlxSprite = capsules[i];
+			cap.visible = true;
+			cap.x = item.x - 36;
+			cap.y = item.y + (item.height - cap.height) / 2;
+			cap.alpha = (i == curSelected) ? 1 : 0.65;
 
 			var icon:HealthIcon = iconArray[i];
 			icon.visible = icon.active = true;
