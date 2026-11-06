@@ -26,6 +26,10 @@ jobs:
         run: |
           haxelib install format --quiet
           haxelib install hxp --quiet
+      - name: Build hxcpp tool
+        run: |
+          cd "$(haxelib libpath hxcpp)/tools/hxcpp"
+          haxe compile.hxml
       - name: Configure Android
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
