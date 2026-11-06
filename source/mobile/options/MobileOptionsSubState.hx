@@ -55,6 +55,12 @@ class MobileOptionsSubState extends BaseOptionsMenu
 		    'bool');
 		addOption(option);
 
+		var option:Option = new Option('Arrow-Only Hitbox',
+		    'If checked, touch zones are only as big as the arrows (no press effect). Unchecked = normal full-column hitbox.',
+		    'arrowOnlyHitbox',
+		    'bool');
+		addOption(option);
+
 		var option:Option = new Option('Dynamic Color',
 		    'If checked, the hitbox will use the color of the notes, else it will use the default color in extrakeys.json',
 		    'dynamicColors',
