@@ -37,7 +37,11 @@ jobs:
           haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
       - name: Compile
-        run: haxelib run lime build android
+        run: |
+          # SScript menanyakan pengaturan pada compile pertama (jawab n = bawaan), lalu keluar dengan kode 1.
+          # Jadi dijalankan dua kali: yang pertama hanya untuk membuat berkas pengaturannya.
+          echo n | haxelib run lime build android || true
+          haxelib run lime build android
       - name: Upload Artifact
         uses: actions/upload-artifact@main
         with:
